@@ -1,0 +1,140 @@
+#!/usr/bin/env bash
+
+# Envs
+
+PASSRC=${PASSRC:-"$HOME/.passrc"}
+PASS_STORE=${PASS_STORE:-"$HOME/.pass/"}
+PASS_TOMB=${PASS_TOMB:-"$HOME/.pass.tomb"}
+TOMB_KEY=$(sed -n 's/^TOMB_KEY=//p' "$PASSRC")
+
+if [[ "$PASS_STORE" != "$HOME"* ]]; then
+  echo "Danger! PASS_STORE is not located within the home directory!"
+  echo "PASS_STORE Location: $PASS_STORE"
+  echo "Exitting!"
+  exit 1
+fi
+
+function usage() {
+  cat <<EOF
+Pass-Tomb: A Tomb Helper for pass
+
+Usage: $0 [options] <command> [arguments]
+
+Options:
+  -f, --force       Bypass confirmation dialogs
+  -h, --help        Display this help message and exit
+
+Commands:
+  dig <TOMB_KEY>           Create a tomb
+  setup <TOMB_KEY>         Move all passwords to your tomb
+  version                  Display the current version number
+
+Examples:
+  $0 new -c MyAccount 20
+  $0 clip MyAccount
+  $0 list
+  $0 git status
+  $0 reset -f
+EOF
+}
+
+function version() {
+  echo "v.1.0.0-alpha"
+}
+
+function error_check() {
+  error=$?
+  [[ "$error" -ne 0 ]] && {
+    echo "An error occurred!" >&2
+    exit 1
+  }
+}
+
+function password_dig() {
+  local TOMB_KEY
+  TOMB_KEY=${1:-$TOMB_KEY}
+  if [ -z "$TOMB_KEY" ]; then
+    echo "Missing TOMB_KEY directory!"
+    echo "Example: pass-tomb open $HOME/.pass.tomb.key"
+    exit 1
+  fi
+  tomb dig -s 10 "$PASS_TOMB"
+  tomb forge "$TOMB_KEY"
+  tomb lock "$PASS_TOMB" -k "$TOMB_KEY"
+}
+
+function password_setup() {
+  local TOMB_KEY
+  TOMB_KEY=${1:-$TOMB_KEY}
+  if [ ! -d "$PASS_STORE" ]; then
+    echo "Missing PASS_STORE directory!"
+    exit 1
+  fi
+  if [ -z "$TOMB_KEY" ]; then
+    echo "Missing TOMB_KEY directory!"
+    echo "Example: pass-tomb open $HOME/.pass.tomb.key"
+    exit 1
+  fi
+  cp -r "$PASS_STORE" "$HOME/.pass.bak"
+  error_check
+  mv "$PASS_STORE" "$HOME/.pass-staged"
+  error_check
+  tomb open "$PASS_TOMB" -l "$TOMB_KEY"
+  error_check
+  mv "$HOME/.pass-staged/*" "$PASS_STORE"
+  error_check
+  tomb close
+  echo "All passwords are succesfully stored in your $PASS_TOMB!"
+  echo "A backup file at $HOME/.pass.bak have been created"
+}
+
+function password_open() {
+  local TOMB_KEY
+  TOMB_KEY=${1:-$TOMB_KEY}
+  if [ -z "$TOMB_KEY" ]; then
+    echo "Missing TOMB_KEY directory!"
+    echo 'Example: pass-tomb open "$HOME/.pass.tomb.key"'
+    exit 1
+  fi
+  tomb open "$PASS_TOMB" -k "$TOMB_KEY"
+}
+
+while getopts ":hfco" opt; do
+  case "$opt" in
+  f)
+    shift
+    FORCE=true
+    ;;
+  h)
+    usage
+    exit 0
+    ;;
+  ?)
+    echo "Error: Invalid option '-$OPTARG'" >&2
+    usage
+    ;;
+  esac
+done
+
+shift $((OPTIND - 1))
+
+case "$1" in
+-h | --help | usage)
+  usage
+  exit 0
+  ;;
+setup)
+  shift
+  password_import "$1"
+  exit 0
+  ;;
+dig)
+  shift
+  password_dig "$1"
+  exit 0
+  ;;
+--version | version)
+  version
+  exit 0
+  ;;
+esac
