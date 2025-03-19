@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.1.0] 2025-03-19
+
+### Added
+
+- Support to set EXHUME and GPG_ID option in `.passrc`
+- Notification when opening a tomb, by using the `-n` flag or setting `NOTIFY=true` in `.passrc`
+
+### Fixed
+
+- Title typo
+
 ## [1.0.0] 2025-03-19
 
 ### Added
