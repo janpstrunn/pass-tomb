@@ -19,7 +19,7 @@ fi
 
 function usage() {
   cat <<EOF
-pass-tomb: The Crypto Undertaker for you passwords
+pass-tomb: The Crypto Undertaker for your passwords
 
 Usage: $0 [options] <command> [arguments]
 

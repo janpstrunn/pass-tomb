@@ -1,7 +1,7 @@
 <img src="https://git.disroot.org/janpstrunn/images/raw/branch/main/pass.png" align="right" height="100"/>
 <br>
 
-# pass-tomb: The Crypto Undertaker for you passwords
+# pass-tomb: The Crypto Undertaker for your passwords
 
 `pass-tomb` is a `tomb` script, meant to be used alongside [pass](https://github.com/janpstrunn/pass) which tries to replace the [passwordstore](https://www.passwordstore.org/) keeping its core philosophies.
 
