@@ -110,6 +110,8 @@ function tomb_import() {
 
 function password_open() {
   local TOMB_KEY
+  EXHUME=${EXHUME:-$(sed -n 's/^EXHUME=//p' "$PASSRC")}
+  GPG_ID=${GPG_ID:-$(sed -n 's/^GPG_ID=//p' "$PASSRC")}
   TOMB_KEY=${1:-$TOMB_KEY}
   PASS_TOMB=${PASS_TOMB:-"$HOME/.pass.tomb"}
   check_tomb_key
