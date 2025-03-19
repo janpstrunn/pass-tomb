@@ -5,6 +5,7 @@
 PASSRC=${PASSRC:-"$HOME/.passrc"}
 PASS_STORE=${PASS_STORE:-"$HOME/.pass/"}
 PASS_TOMB=$(sed -n 's/^PASS_TOMB_DIR=//p' "$PASSRC")
+TOMB_KEY=$(sed -n 's/^TOMB_KEY=//p' "$PASSRC")
 
 RED="$(tput setaf 196)"
 BLUE="$(tput setaf 87)"
