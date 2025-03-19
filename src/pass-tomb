@@ -59,7 +59,7 @@ function global_error() {
 
 function check_tomb_key() {
   if [ -z "$TOMB_KEY" ]; then
-    text "$RED" "Error: Missing TOMB_KEY directory!"
+    text "$RED" "Error: Missing TOMB_KEY!"
     text "$BLUE" "Example: pass-tomb open $HOME/.pass.tomb.key"
     exit 1
   fi
@@ -127,9 +127,12 @@ function password_open() {
       tomb open "$PASS_TOMB" -k "$TOMB_KEY" "$PASS_STORE"
     fi
   fi
+  if [ "$NOTIFY" = "true" ]; then
+    notify-send -u normal "Pass: Tomb" "Your tomb is open at \$PASS_STORE"
+  fi
 }
 
-while getopts ":hvge" opt; do
+while getopts ":hvgen" opt; do
   case "$opt" in
   h)
     usage
@@ -141,6 +144,9 @@ while getopts ":hvge" opt; do
     ;;
   e)
     EXHUME=true
+    ;;
+  n)
+    NOTIFY=true
     ;;
   g)
     GPG_DIG=true
@@ -176,6 +182,11 @@ version)
 open)
   shift
   password_open "$1" "$2"
+  exit 0
+  ;;
+*)
+  text "$RED" "Error: Invalid command $1" >&2
+  usage
   exit 0
   ;;
 esac
