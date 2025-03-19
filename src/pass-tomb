@@ -114,6 +114,7 @@ function password_open() {
   GPG_ID=${GPG_ID:-$(sed -n 's/^GPG_ID=//p' "$PASSRC")}
   TOMB_KEY=${1:-$TOMB_KEY}
   PASS_TOMB=${PASS_TOMB:-"$HOME/.pass.tomb"}
+  NOTIFY=${NOTIFY:-$(sed -n 's/^NOTIFY=//p' "$PASSRC")}
   check_tomb_key
   if [ "$EXHUME" = "true" ]; then
     secret_key=$(tomb exhume "$TOMB_KEY")
