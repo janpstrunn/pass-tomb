@@ -4,8 +4,10 @@
 
 PASSRC=${PASSRC:-"$HOME/.passrc"}
 PASS_STORE=${PASS_STORE:-"$HOME/.pass/"}
-PASS_TOMB=${PASS_TOMB:-"$HOME/.pass.tomb"}
-TOMB_KEY=$(sed -n 's/^TOMB_KEY=//p' "$PASSRC")
+PASS_TOMB=$(sed -n 's/^PASS_TOMB_DIR=//p' "$PASSRC")
+
+RED="$(tput setaf 196)"
+BLUE="$(tput setaf 87)"
 
 if [[ "$PASS_STORE" != "$HOME"* ]]; then
   echo "Danger! PASS_STORE is not located within the home directory!"
@@ -16,98 +18,131 @@ fi
 
 function usage() {
   cat <<EOF
-Pass-Tomb: A Tomb Helper for pass
+pass-tomb: The Crypto Undertaker for you passwords
 
 Usage: $0 [options] <command> [arguments]
 
 Options:
-  -f, --force       Bypass confirmation dialogs
-  -h, --help        Display this help message and exit
+  -e             Exhume buried key to unlock a tomb
+  -g             Create a tomb key using GPG ID
+  -h             Display this help message and exit
 
 Commands:
-  dig <TOMB_KEY>           Create a tomb
-  setup <TOMB_KEY>         Move all passwords to your tomb
-  version                  Display the current version number
-
-Examples:
-  $0 new -c MyAccount 20
-  $0 clip MyAccount
-  $0 list
-  $0 git status
-  $0 reset -f
+  dig [-g] <TOMB_KEY> <GPG-ID>
+                          Create a tomb
+  import <TOMB_KEY>       Move all passwords to your tomb
+  open [-e -g] <TOMB_KEY>
+                          Open a Tomb at $PASS_STORE
+  version                 Display the current version number
 EOF
 }
 
 function version() {
-  echo "v.1.0.0-alpha"
+  echo "v.1.0.0"
 }
 
-function error_check() {
+function text() {
+  color=$1
+  text=$2
+  reset=$(tput sgr0)
+  echo -e "${color}${text}${reset}"
+}
+
+function global_error() {
   error=$?
   [[ "$error" -ne 0 ]] && {
-    echo "An error occurred!" >&2
+    text "$RED" "An error occurred!" >&2
     exit 1
   }
 }
 
-function password_dig() {
-  local TOMB_KEY
-  TOMB_KEY=${1:-$TOMB_KEY}
+function check_tomb_key() {
   if [ -z "$TOMB_KEY" ]; then
-    echo "Missing TOMB_KEY directory!"
-    echo "Example: pass-tomb open $HOME/.pass.tomb.key"
+    text "$RED" "Error: Missing TOMB_KEY directory!"
+    text "$BLUE" "Example: pass-tomb open $HOME/.pass.tomb.key"
     exit 1
   fi
-  tomb dig -s 10 "$PASS_TOMB"
-  tomb forge "$TOMB_KEY"
-  tomb lock "$PASS_TOMB" -k "$TOMB_KEY"
 }
 
-function password_setup() {
+function password_dig() {
+  local TOMB_KEY GPG_ID
+  PASS_TOMB=${PASS_TOMB:-"$HOME/.pass.tomb"}
+  TOMB_KEY=${1:-$TOMB_KEY}
+  check_tomb_key
+  tomb dig -s 10 "$PASS_TOMB"
+  global_error
+  if [ "$GPG_DIG" = "true" ]; then
+    GPG_ID="$2"
+    if [ -z "$GPG_ID" ]; then
+      text "$RED" "Error: Missing GPG ID"
+    fi
+    text "$BLUE" "Forging a tomb key using GPG ID"
+    tomb forge "$TOMB_KEY" -gR "$GPG_ID"
+    tomb lock "$PASS_TOMB" -k "$TOMB_KEY" -gR "$GPG_ID"
+  else
+    tomb forge "$TOMB_KEY"
+    tomb lock "$PASS_TOMB" -k "$TOMB_KEY"
+  fi
+}
+
+function tomb_import() {
   local TOMB_KEY
   TOMB_KEY=${1:-$TOMB_KEY}
+  PASS_TOMB=${PASS_TOMB:-"$HOME/.pass.tomb"}
   if [ ! -d "$PASS_STORE" ]; then
-    echo "Missing PASS_STORE directory!"
+    text "$RED" "Error: Missing PASS_STORE directory!"
     exit 1
   fi
-  if [ -z "$TOMB_KEY" ]; then
-    echo "Missing TOMB_KEY directory!"
-    echo "Example: pass-tomb open $HOME/.pass.tomb.key"
-    exit 1
-  fi
+  check_tomb_key
   cp -r "$PASS_STORE" "$HOME/.pass.bak"
   error_check
   mv "$PASS_STORE" "$HOME/.pass-staged"
   error_check
-  tomb open "$PASS_TOMB" -l "$TOMB_KEY"
+  tomb open "$PASS_TOMB" -k "$TOMB_KEY" "$PASS_STORE"
   error_check
   mv "$HOME/.pass-staged/*" "$PASS_STORE"
   error_check
   tomb close
-  echo "All passwords are succesfully stored in your $PASS_TOMB!"
-  echo "A backup file at $HOME/.pass.bak have been created"
+  text "$BLUE" "All passwords are succesfully stored in your $PASS_TOMB!"
+  text "$BLUE" "A backup at $HOME/.pass.bak have been created"
 }
 
 function password_open() {
   local TOMB_KEY
   TOMB_KEY=${1:-$TOMB_KEY}
-  if [ -z "$TOMB_KEY" ]; then
-    echo "Missing TOMB_KEY directory!"
-    echo 'Example: pass-tomb open "$HOME/.pass.tomb.key"'
-    exit 1
+  PASS_TOMB=${PASS_TOMB:-"$HOME/.pass.tomb"}
+  check_tomb_key
+  if [ "$EXHUME" = "true" ]; then
+    secret_key=$(tomb exhume "$TOMB_KEY")
+    if [ "$GPG_ID" = "true" ]; then
+      tomb open "$PASS_TOMB" -k - "$PASS_STORE" -g <<<"$secret_key"
+    else
+      tomb open "$PASS_TOMB" -k - "$PASS_STORE" <<<"$secret_key"
+    fi
+  else
+    if [ "$GPG_ID" = "true" ]; then
+      tomb open "$PASS_TOMB" -k "$TOMB_KEY" "$PASS_STORE" -g
+    else
+      tomb open "$PASS_TOMB" -k "$TOMB_KEY" "$PASS_STORE"
+    fi
   fi
-  tomb open "$PASS_TOMB" -k "$TOMB_KEY"
 }
 
-while getopts ":hfco" opt; do
+while getopts ":hvge" opt; do
   case "$opt" in
-  f)
-    shift
-    FORCE=true
-    ;;
   h)
     usage
     exit 0
+    ;;
+  v)
+    version
+    exit 0
+    ;;
+  e)
+    EXHUME=true
+    ;;
+  g)
+    GPG_DIG=true
     ;;
   ?)
     echo "Error: Invalid option '-$OPTARG'" >&2
@@ -119,13 +154,13 @@ done
 shift $((OPTIND - 1))
 
 case "$1" in
--h | --help | usage)
+help | usage)
   usage
   exit 0
   ;;
-setup)
+import)
   shift
-  password_import "$1"
+  tomb_import "$1"
   exit 0
   ;;
 dig)
@@ -133,8 +168,13 @@ dig)
   password_dig "$1"
   exit 0
   ;;
---version | version)
+version)
   version
+  exit 0
+  ;;
+open)
+  shift
+  password_open "$1" "$2"
   exit 0
   ;;
 esac
