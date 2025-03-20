@@ -1,0 +1,69 @@
+.TH pass-tomb 1 "March 2025" "1.1.1" "User Commands"
+.SH NAME
+pass-tomb \- The Crypto Undertaker for your passwords
+.SH SYNOPSIS
+.B pass-tomb
+[OPTIONS] <command> [arguments]
+.SH DESCRIPTION
+pass-tomb is a tomb(1) script, meant to be used alongside pass which tries to replace the passwordstore keeping its core philosophies.
+
+It's a CLI tool that tries to help securing your passwords by storing them inside a tomb.
+
+.SH OPTIONS
+.TP
+.B -e
+Exhume a buried key to unlock a tomb.
+.TP
+.B -g
+Create a tomb key using a GPG ID.
+.TP
+.B -h
+Display this help message and exit.
+.TP
+.B -n
+Enable notifications.
+
+.SH COMMANDS
+.TP
+.B dig [-g] <TOMB_KEY> <GPG-ID>
+Create a tomb with the specified key, optionally using a GPG ID for encryption.
+.TP
+.B import <TOMB_KEY>
+Move all passwords from the password store into your tomb.
+.TP
+.B help, usage
+Display help message
+.TP
+.B open [-e -g] <TOMB_KEY>
+Open a tomb at the specified location, optionally using a buried key or GPG ID.
+.TP
+.B version
+Display the current version number.
+
+.SH EXAMPLES
+.TP
+.B pass-tomb new dig -g my.tomb.key DA54ACB7D10
+Create a new tomb using a GPG key.
+.TP
+.B pass-tomb open -e -g my.tomb.key
+Open a tomb using a buried GPG key.
+.TP
+.B pass-tomb import my.tomb.key
+Import all passwords from $PASS_STORE into your tomb.
+
+.SH BURY AND EXHUME
+Burying and exhuming secret keys is a method to hide your secret keys inside a JPG image using steghide(1), also called as deniable key storage, in order to further increase your protection.
+
+Buring is the act of hiding a key inside a JPG image, and exhume is the act of taking it from the JPG image.
+
+.SH GPG Keys
+It's possible to use a GPG key to lock your tomb, by instead of using a default tomb key and a password, you use a encrypted private key using GPG and its password, plus the tomb password. In pass-tomb, the GPG is automatically hidden, so there is no way to know who encrypted such key.
+
+.SH EXIT STATUS
+0 on success, non-zero on failure.
+
+.SH AUTHOR
+Janpstrunn <janpstrunn@disroot.org>
+
+.SH SEE ALSO
+age(1) gpg(1) pass(1) tomb(1)
