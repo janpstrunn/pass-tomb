@@ -18,6 +18,7 @@ It's a CLI tool that tries to help securing your passwords by storing them insid
 ## Requirements
 
 - [pass](https://github.com/janpstrunn/pass)
+- `tomb`
 
 ## Installation
 
