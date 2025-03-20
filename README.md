@@ -23,38 +23,38 @@ It's a CLI tool that tries to help securing your passwords by storing them insid
 ## Installation
 
 ```
-git clone https://github.com/janpstrunn/pass-tomb
-cd pass-tomb
-chmod 700 src/pass-tomb
-mv src/pass-tomb "$HOME/.local/bin"
+curl -sSL https://github.com/janpstrunn/pass-tomb/raw/main/install.sh | bash
 ```
 
 ## Usage
 
 ```
-pass-tomb: The Crypto Undertaker for you passwords
+pass-tomb: The Crypto Undertaker for your passwords
 
-Usage: $0 [options] <command> [arguments]
+Usage: pass-tomb [options] <command> [arguments]
 
 Options:
   -e             Exhume buried key to unlock a tomb
   -g             Create a tomb key using GPG ID
   -h             Display this help message and exit
+  -n             Enable notifications
 
 Commands:
   dig [-g] <TOMB_KEY> <GPG-ID>
                           Create a tomb
   import <TOMB_KEY>       Move all passwords to your tomb
+  help, usage             Display this message and exits
   open [-e -g] <TOMB_KEY>
                           Open a Tomb at $PASS_STORE
   version                 Display the current version number
 
 Examples:
-  $0 new dig -g my.tomb.key DA54ACB7D10
+  pass-tomb new dig -g my.tomb.key DA54ACB7D10
                           # Creates a new tomb using a GPG key
-  $0 open -e -g my.tomb.key
+  pass-tomb open -e -g my.tomb.key
                           # Open a tomb using a buried GPG key
-  $0 import my.tomb.key   # Imports all passwords from $PASS_STORE
+  pass-tomb import my.tomb.key
+                          # Imports all passwords from $PASS_STORE
                           # tou your tomb, and closes it
 ```
 
