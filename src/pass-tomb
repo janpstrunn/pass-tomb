@@ -53,6 +53,9 @@ function global_error() {
   error=$?
   [[ "$error" -ne 0 ]] && {
     text "$RED" "An error occurred!" >&2
+    if [ "$NOTIFY" = "true" ]; then
+      notify-send -u critical "Pass: Error" "An error occurred!" --expire-time=5000
+    fi
     exit 1
   }
 }
@@ -61,6 +64,9 @@ function check_tomb_key() {
   if [ -z "$TOMB_KEY" ]; then
     text "$RED" "Error: Missing TOMB_KEY!"
     text "$BLUE" "Example: pass-tomb open $HOME/.pass.tomb.key"
+    if [ "$NOTIFY" = "true" ]; then
+      notify-send -u critical "Pass: Tomb" "Missing TOMB_KEY!" --expire-time=5000
+    fi
     exit 1
   fi
 }
@@ -76,6 +82,9 @@ function password_dig() {
     GPG_ID="$2"
     if [ -z "$GPG_ID" ]; then
       text "$RED" "Error: Missing GPG ID"
+      if [ "$NOTIFY" = "true" ]; then
+        notify-send -u critical "Pass: Error" "Missing GPG ID!" --expire-time=5000
+      fi
     fi
     text "$BLUE" "Forging a tomb key using GPG ID"
     tomb forge "$TOMB_KEY" -gR "$GPG_ID"
@@ -92,6 +101,9 @@ function tomb_import() {
   PASS_TOMB=${PASS_TOMB:-"$HOME/.pass.tomb"}
   if [ ! -d "$PASS_STORE" ]; then
     text "$RED" "Error: Missing PASS_STORE directory!"
+    if [ "$NOTIFY" = "true" ]; then
+      notify-send -u critical "Pass: Error" "Missing PASS_STORE directory!" --expire-time=5000
+    fi
     exit 1
   fi
   check_tomb_key
@@ -131,7 +143,7 @@ function password_open() {
     fi
   fi
   if [ "$NOTIFY" = "true" ]; then
-    notify-send -u normal "Pass: Tomb" "Your tomb is open at \$PASS_STORE"
+    notify-send -u normal "Pass: Tomb" "Your tomb is open at \$PASS_STORE" --expire-time=3500
   fi
 }
 
