@@ -1,0 +1,40 @@
+#compdef pass-tomb
+
+_pass_list() {
+  local passwords
+  passwords=($(ls))
+  _describe 'stored passwords' passwords
+}
+
+_pass_commands() {
+  local -a commands
+  commands=(
+    "dig:Generate a tomb"
+    "import:Move passwords from .pass to a tomb"
+    "open:Open a tomb"
+    "help:Display help message"
+    "version:Display the current version number"
+  )
+  _describe -t commands 'command' commands "$@"
+}
+
+_arguments \
+  '(-)-[Show available options]' \
+  '(-h)'-h'[Display help message]' \
+  '(-e)'-e'[Exhume buried key to unlock a tomb]' \
+  '(-g)'-g'[Create a tomb key using a GPG ID]' \
+  '1:command:->command' \
+  '*::arguments:->args'
+
+case $state in
+command)
+  _pass_commands
+  ;;
+args)
+  case $words[1] in
+  open)
+    _pass_list
+    ;;
+  esac
+  ;;
+esac
