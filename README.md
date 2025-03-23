@@ -1,19 +1,17 @@
 <img src="https://git.disroot.org/janpstrunn/images/raw/branch/main/pass.png" align="right" height="100"/>
 <br>
 
-# pass-tomb: The Crypto Undertaker for your passwords
+# pass-tomb: The Crypto Undertaker for Your Passwords
 
-`pass-tomb` is a `tomb` script, meant to be used alongside [pass](https://github.com/janpstrunn/pass) which tries to replace the [passwordstore](https://www.passwordstore.org/) keeping its core philosophies.
-
-It's a CLI tool that tries to help securing your passwords by storing them inside a tomb.
+`pass-tomb` is a sophisticated `tomb` script designed to complement [pass](https://github.com/janpstrunn/pass), which aims to replace the [passwordstore](https://www.passwordstore.org/) while maintaining its core principles. This CLI tool enhances the security of your passwords by storing them within an encrypted tomb, ensuring robust protection.
 
 ## Features
 
-- Create a dedicated tomb for `pass`, which is 10 MB sized by default
-- Use GPG to encrypt a tomb key
-- Import all passwords from `$PASS_STORE` to a tomb
-- Add `PASS_TOMB_DIR` and `TOMB_KEY` to `.passrc` to automatize their locations
-- Open a tomb using a GPG Key, or exhumed keys to `$PASS_STORE`
+- **Dedicated Tomb Creation**: Create a 10 MB tomb specifically for `pass`.
+- **GPG Encryption**: Use GPG to encrypt the tomb key.
+- **Seamless Import**: Import all passwords from `$PASS_STORE` to the tomb.
+- **Automated Configuration**: Add `PASS_TOMB_DIR` and `TOMB_KEY` to `.passrc` for automated management.
+- **Effortless Access**: Open the tomb using a GPG key or exhumed keys to `$PASS_STORE`.
 
 ## Requirements
 
@@ -22,14 +20,18 @@ It's a CLI tool that tries to help securing your passwords by storing them insid
 
 ## Installation
 
-```
+```bash
 curl -sSL https://github.com/janpstrunn/pass-tomb/raw/main/install.sh | bash
 ```
 
 ## Usage
 
 ```
-pass-tomb: The Crypto Undertaker for your passwords
+  ---------------------------------------------------
+  ---------------------pass-tomb---------------------
+  ---------------------------------------------------
+  ------The Crypto Undertaker for Your Passwords-----
+  ---------------------------------------------------
 
 Usage: pass-tomb [options] <command> [arguments]
 
@@ -59,12 +61,12 @@ Examples:
 ```
 
 > [!IMPORTANT]
-> First time running `pass-tomb`, requires to use setup your [pass](https://github.com/janpstrunn/pass) first.
+> First-time users must set up [pass](https://github.com/janpstrunn/pass) before using `pass-tomb`.
 
 ## Notes
 
-This script has been only tested in a Linux Machine.
+This script has been tested exclusively on a Linux machine.
 
 ## License
 
-This repository is licensed under the MIT License, a very permissive license that allows you to use, modify, copy, distribute and more.
+This repository is licensed under the MIT License, allowing for extensive use, modification, copying, and distribution.
